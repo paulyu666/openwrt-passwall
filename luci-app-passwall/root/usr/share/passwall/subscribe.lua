@@ -49,6 +49,32 @@ local function is_filter_keyword(value)
 			end
 		end
 		return result
+	elseif filter_keyword_mode_default == "3" then
+		local result = false
+		for k,v in ipairs(filter_keyword_discard_list_default) do
+			if value:find(v) then
+				result = true
+			end
+		end
+		for k,v in ipairs(filter_keyword_keep_list_default) do
+			if value:find(v) then
+				result = false
+			end
+		end
+		return result
+	elseif filter_keyword_mode_default == "4" then
+		local result = true
+		for k,v in ipairs(filter_keyword_keep_list_default) do
+			if value:find(v) then
+				result = false
+			end
+		end
+		for k,v in ipairs(filter_keyword_discard_list_default) do
+			if value:find(v) then
+				result = true
+			end
+		end
+		return result
 	end
 	return false
 end
@@ -65,7 +91,7 @@ local log = function(...)
 	if debug == true then
 		print(result)
 	else
-		local f, err = io.open("/var/log/" .. appname .. ".log", "a")
+		local f, err = io.open("/tmp/log/" .. appname .. ".log", "a")
 		if f and err == nil then
 			f:write(result .. "\n")
 			f:close()
@@ -422,7 +448,7 @@ local function processData(szType, content, add_mode, add_from)
 		if not info.security then result.security = "auto" end
 		if info.tls == "tls" or info.tls == "1" then
 			result.tls = "1"
-			result.tls_serverName = info.sni
+			result.tls_serverName = (info.sni and info.sni ~= "") and info.sni or info.host
 			result.tls_allowInsecure = allowInsecure_default and "1" or "0"
 		else
 			result.tls = "0"
@@ -735,9 +761,7 @@ local function processData(szType, content, add_mode, add_from)
 					result.xtls = "1"
 					result.flow = params.flow or "xtls-rprx-direct"
 				end
-				if params.sni then
-					result.tls_serverName = params.sni
-				end
+				result.tls_serverName = (params.sni and params.sni ~= "") and params.sni or params.host
 			end
 
 			result.port = port
@@ -1075,7 +1099,13 @@ local execute = function()
 		local subscribe_list = {}
 		local retry = {}
 		if arg[2] then
-			subscribe_list[#subscribe_list + 1] = uci:get_all(appname, arg[2]) or {}
+			string.gsub(arg[2], '[^' .. "," .. ']+', function(w)
+				subscribe_list[#subscribe_list + 1] = uci:get_all(appname, w) or {}
+			end)
+		else
+			uci:foreach(appname, "subscribe_list", function(o)
+				subscribe_list[#subscribe_list + 1] = o
+			end)
 		end
 
 		for index, value in ipairs(subscribe_list) do
@@ -1084,7 +1114,7 @@ local execute = function()
 			if value.allowInsecure and value.allowInsecure ~= "1" then
 				allowInsecure_default = nil
 			end
-			local filter_keyword_mode = value.filter_keyword_mode or "3"
+			local filter_keyword_mode = value.filter_keyword_mode or "5"
 			if filter_keyword_mode == "0" then
 				filter_keyword_mode_default = "0"
 			elseif filter_keyword_mode == "1" then
@@ -1093,6 +1123,14 @@ local execute = function()
 			elseif filter_keyword_mode == "2" then
 				filter_keyword_mode_default = "2"
 				filter_keyword_keep_list_default = value.filter_keep_list or {}
+			elseif filter_keyword_mode == "3" then
+				filter_keyword_mode_default = "3"
+				filter_keyword_keep_list_default = value.filter_keep_list or {}
+				filter_keyword_discard_list_default = value.filter_discard_list or {}
+			elseif filter_keyword_mode == "4" then
+				filter_keyword_mode_default = "4"
+				filter_keyword_keep_list_default = value.filter_keep_list or {}
+				filter_keyword_discard_list_default = value.filter_discard_list or {}
 			end
 			local ss_aead_type = value.ss_aead_type or "global"
 			if ss_aead_type ~= "global" then

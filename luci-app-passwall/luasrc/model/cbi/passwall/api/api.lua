@@ -136,6 +136,16 @@ function ip_or_mac(val)
     return ""
 end
 
+function iprange(val)
+    if val then
+        local ipStart, ipEnd = val:match("^([^/]+)-([^/]+)$")
+        if (ipStart and datatypes.ip4addr(ipStart)) and (ipEnd and datatypes.ip4addr(ipEnd)) then
+            return true
+        end
+    end
+    return false
+end
+
 function get_valid_nodes()
     local nodes_ping = uci_get_type("global_other", "nodes_ping") or ""
     local nodes = {}
@@ -275,17 +285,17 @@ function get_v2ray_path()
 end
 
 function get_v2ray_version(file)
-    sys.call("mkdir -p /var/etc/passwall_tmp")
+    sys.call("mkdir -p /tmp/etc/passwall_tmp")
     if file == nil then file = get_v2ray_path() end
     chmod_755(file)
     if fs.access(file) then
         if file == get_v2ray_path() then
             local md5 = sys.exec("echo -n $(md5sum " .. file .. " | awk '{print $1}')")
-            if fs.access("/var/etc/passwall_tmp/" .. md5) then
-                return sys.exec("echo -n $(cat /var/etc/passwall_tmp/%s)" % md5)
+            if fs.access("/tmp/etc/passwall_tmp/" .. md5) then
+                return sys.exec("echo -n $(cat /tmp/etc/passwall_tmp/%s)" % md5)
             else
                 local version = sys.exec("echo -n $(%s -version | awk '{print $2}' | sed -n 1P)" % file)
-                sys.call("echo '" .. version .. "' > " .. "/var/etc/passwall_tmp/" .. md5)
+                sys.call("echo '" .. version .. "' > " .. "/tmp/etc/passwall_tmp/" .. md5)
                 return version
             end
         else
@@ -301,17 +311,17 @@ function get_xray_path()
 end
 
 function get_xray_version(file)
-    sys.call("mkdir -p /var/etc/passwall_tmp")
+    sys.call("mkdir -p /tmp/etc/passwall_tmp")
     if file == nil then file = get_xray_path() end
     chmod_755(file)
     if fs.access(file) then
         if file == get_xray_path() then
             local md5 = sys.exec("echo -n $(md5sum " .. file .. " | awk '{print $1}')")
-            if fs.access("/var/etc/passwall_tmp/" .. md5) then
-                return sys.exec("echo -n $(cat /var/etc/passwall_tmp/%s)" % md5)
+            if fs.access("/tmp/etc/passwall_tmp/" .. md5) then
+                return sys.exec("echo -n $(cat /tmp/etc/passwall_tmp/%s)" % md5)
             else
                 local version = sys.exec("echo -n $(%s -version | awk '{print $2}' | sed -n 1P)" % file)
-                sys.call("echo '" .. version .. "' > " .. "/var/etc/passwall_tmp/" .. md5)
+                sys.call("echo '" .. version .. "' > " .. "/tmp/etc/passwall_tmp/" .. md5)
                 return version
             end
         else
@@ -327,17 +337,17 @@ function get_trojan_go_path()
 end
 
 function get_trojan_go_version(file)
-    sys.call("mkdir -p /var/etc/passwall_tmp")
+    sys.call("mkdir -p /tmp/etc/passwall_tmp")
     if file == nil then file = get_trojan_go_path() end
     chmod_755(file)
     if fs.access(file) then
         if file == get_trojan_go_path() then
             local md5 = sys.exec("echo -n $(md5sum " .. file .. " | awk '{print $1}')")
-            if fs.access("/var/etc/passwall_tmp/" .. md5) then
-                return sys.exec("echo -n $(cat /var/etc/passwall_tmp/%s)" % md5)
+            if fs.access("/tmp/etc/passwall_tmp/" .. md5) then
+                return sys.exec("echo -n $(cat /tmp/etc/passwall_tmp/%s)" % md5)
             else
                 local version = sys.exec("echo -n $(%s -version | awk '{print $2}' | sed -n 1P)" % file)
-                sys.call("echo '" .. version .. "' > " .. "/var/etc/passwall_tmp/" .. md5)
+                sys.call("echo '" .. version .. "' > " .. "/tmp/etc/passwall_tmp/" .. md5)
                 return version
             end
         else
@@ -353,17 +363,17 @@ function get_kcptun_path()
 end
 
 function get_kcptun_version(file)
-    sys.call("mkdir -p /var/etc/passwall_tmp")
+    sys.call("mkdir -p /tmp/etc/passwall_tmp")
     if file == nil then file = get_kcptun_path() end
     chmod_755(file)
     if fs.access(file) then
         if file == get_kcptun_path() then
             local md5 = sys.exec("echo -n $(md5sum " .. file .. " | awk '{print $1}')")
-            if fs.access("/var/etc/passwall_tmp/" .. md5) then
-                return sys.exec("echo -n $(cat /var/etc/passwall_tmp/%s)" % md5)
+            if fs.access("/tmp/etc/passwall_tmp/" .. md5) then
+                return sys.exec("echo -n $(cat /tmp/etc/passwall_tmp/%s)" % md5)
             else
                 local version = sys.exec("echo -n $(%s -v | awk '{print $3}')" % file)
-                sys.call("echo '" .. version .. "' > " .. "/var/etc/passwall_tmp/" .. md5)
+                sys.call("echo '" .. version .. "' > " .. "/tmp/etc/passwall_tmp/" .. md5)
                 return version
             end
         else
@@ -379,17 +389,17 @@ function get_brook_path()
 end
 
 function get_brook_version(file)
-    sys.call("mkdir -p /var/etc/passwall_tmp")
+    sys.call("mkdir -p /tmp/etc/passwall_tmp")
     if file == nil then file = get_brook_path() end
     chmod_755(file)
     if fs.access(file) then
         if file == get_brook_path() then
             local md5 = sys.exec("echo -n $(md5sum " .. file .. " | awk '{print $1}')")
-            if fs.access("/var/etc/passwall_tmp/" .. md5) then
-                return sys.exec("echo -n $(cat /var/etc/passwall_tmp/%s)" % md5)
+            if fs.access("/tmp/etc/passwall_tmp/" .. md5) then
+                return sys.exec("echo -n $(cat /tmp/etc/passwall_tmp/%s)" % md5)
             else
                 local version = sys.exec("echo -n $(%s -v | awk '{print $3}')" % file)
-                sys.call("echo '" .. version .. "' > " .. "/var/etc/passwall_tmp/" .. md5)
+                sys.call("echo '" .. version .. "' > " .. "/tmp/etc/passwall_tmp/" .. md5)
                 return version
             end
         else
@@ -405,17 +415,17 @@ function get_hysteria_path()
 end
 
 function get_hysteria_version(file)
-    sys.call("mkdir -p /var/etc/passwall_tmp")
+    sys.call("mkdir -p /tmp/etc/passwall_tmp")
     if file == nil then file = get_hysteria_path() end
     chmod_755(file)
     if fs.access(file) then
         if file == get_hysteria_path() then
             local md5 = sys.exec("echo -n $(md5sum " .. file .. " | awk '{print $1}')")
-            if fs.access("/var/etc/passwall_tmp/" .. md5) then
-                return sys.exec("echo -n $(cat /var/etc/passwall_tmp/%s)" % md5)
+            if fs.access("/tmp/etc/passwall_tmp/" .. md5) then
+                return sys.exec("echo -n $(cat /tmp/etc/passwall_tmp/%s)" % md5)
             else
                 local version = sys.exec("echo -n $(%s -v | awk '{print $3}')" % file)
-                sys.call("echo '" .. version .. "' > " .. "/var/etc/passwall_tmp/" .. md5)
+                sys.call("echo '" .. version .. "' > " .. "/tmp/etc/passwall_tmp/" .. md5)
                 return version
             end
         else
